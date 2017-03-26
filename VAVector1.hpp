@@ -44,8 +44,7 @@ public:
         std::cout << "CtorMove\n";
 
         // I'm tired
-        operator=(right);
-        delete right;
+        operator=(std::move(right));
     }
 
     // деструктор
@@ -55,13 +54,32 @@ public:
         delete[] vec;
     }
 
-    const Vector &operator=(const Vector &right)
+    Vector& operator=(const Vector& right)
     {
         VSize = right.size();
         VCapacity = right.capacity();
 
-        for (std::size_t i = 0; i < VSize; ++i) {
+        for (std::size_t i = 0; i < VSize; ++i)
+        {
             vec[i] = right[i];
+        }
+
+        return *this;
+    }
+
+    Vector& operator=(Vector&& right)
+    {
+        if (this != &right)
+        {
+            delete[] vec;
+
+            vec = right.vec;
+            VSize = right.VSize;
+            VCapacity = right.VCapacity;
+
+            right.vec = nullptr;
+            right.VSize = 0;
+            right.VCapacity = 8;
         }
 
         return *this;
@@ -128,12 +146,12 @@ public:
         return vec[VSize - 1];
     }
 
-    const T &back() const
+    const T& back() const
     {
         return vec[0];
     }
 
-    void push_back(const T &val)
+    void push_back(const T& val)
     {
         if (VSize == VCapacity)
             reserve(VSize * 2 + 1);
